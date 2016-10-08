@@ -14,6 +14,7 @@ from testutils import debug
 from collections import namedtuple
 import base64
 import struct
+import json
 
 #--external imports
 import numpy as np
@@ -36,7 +37,7 @@ class MatFac(skeleton.Model):
     def _grad(self, user, item, data):
         grad = self._eta * (self.suggest(user, item) - data)
         return gradient(
-            user=item.vector * grad,
+            user=np.mean(item.vector * grad), # multiple items
             item=user.vector * grad,
             biases=grad)
 
@@ -44,7 +45,7 @@ class MatFac(skeleton.Model):
         grad = self._grad(user, item, data)
         user = vecbi(
             vector=user.vector - grad.user,
-            bias=user.bias - np.mean(grad.biases)) # may have multiple items
+            bias=user.bias - np.mean(grad.biases)) # multiple items
         item = vecbi(
             vector=item.vector - grad.item,
             bias=item.bias - grad.biases)
@@ -86,7 +87,6 @@ class FBSystem(skeleton.System):
                 event['data'])
 
             self.export(user, item)
-
         self._stream.start(handle)
 
     def export(self, user, item):
@@ -113,8 +113,9 @@ class QueuedFBSystem(FBSystem):
             path = event['path']
             if path.startswith('/'): path = path[1:]
             username, itemname = path.split('/')
+            payload = json.dumps({'meme': itemname, 'data': event['data']})
             self._queue.add([taskqueue.Task(
-                payload=itemname,
+                payload=payload,
                 tag=username,
                 method='PULL')])
         self._stream.start(handle)
