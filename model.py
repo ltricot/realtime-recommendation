@@ -23,6 +23,7 @@ from google.appengine.api import taskqueue
 
 #--code
 gradient = namedtuple('gradient', ['user', 'item', 'biases'])
+# TO-DO user & item separated bias gradients ^
 vecbi = namedtuple('item', ['vector', 'bias'])
 
 
@@ -43,7 +44,7 @@ class MatFac(skeleton.Model):
         grad = self._grad(user, item, data)
         user = vecbi(
             vector=user.vector - grad.user,
-            bias=user.bias - grad.biases)
+            bias=user.bias - np.mean(grad.biases)) # may have multiple items
         item = vecbi(
             vector=item.vector - grad.item,
             bias=item.bias - grad.biases)
@@ -77,7 +78,7 @@ class FBSystem(skeleton.System):
             ubias, user = self._firebase.get('/vectors/users', username).split('_')
             ibias, item = self._firebase.get('/vectors/memes', itemname).split('_')
             user, item = self._coder.decode(user, item)
-            ubias, ibias = float(ubias), float(ibias)
+            ubias, ibias = map(float, (ubias, ibias))
 
             user, item = self.update(
                 vecbi(user, ubias),

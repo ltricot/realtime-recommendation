@@ -34,18 +34,6 @@ class DataModel(skeleton.System):
     """
     key = 4
 
-    def __init__(self, *args, **kwargs):
-        """
-            Automatically determines the `nb_users` and `nb_items` arguments
-        of the recommender model.
-
-        """
-
-        if 'nb_users' not in kwargs:
-            data = self.fetch()
-            kwargs['nb_users'], kwargs['nb_items'] = data.shape
-        super().__init__(*args, **kwargs)
-
     def update(self, data=None, *args, **kwargs):
         """
             Simply fetches data and passes it to the next update method in the
@@ -77,19 +65,6 @@ class DataModel(skeleton.System):
         a, b = self.data.values[users].nonzero()
         suggestions.iloc[tuple(a), tuple(b)] = -1
         return suggestions
-
-    def export(self):
-        """
-            Forms data to export automatically with suggest method, and calls
-        the next export method in the class's MRO.
-
-        """
-
-        data = pd.DataFrame(
-            self.suggest(),
-            index=self.data.index,
-            columns=self.data.columns)
-        super().export(data)
 
 
 @debug
