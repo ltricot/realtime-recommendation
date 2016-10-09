@@ -1,4 +1,4 @@
-from model2 import *
+from model import *
 system = type('system', (FBSystem, MatFac), {})
 s = system('https://meme-tinder.firebaseio.com/', Encoder(), 0.001)
 s.fetch()

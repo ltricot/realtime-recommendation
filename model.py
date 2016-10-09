@@ -19,12 +19,12 @@ import json
 #--external imports
 import numpy as np
 from firebase import firebase
-from google.appengine.api import taskqueue
+# from google.appengine.api import taskqueue
 
 
 #--code
 gradient = namedtuple('gradient', ['user', 'item', 'biases'])
-# TO-DO user & item separated bias gradients ^
+# TO-DO user & item separated bias gradients ^. Actually not necessarily
 vecbi = namedtuple('item', ['vector', 'bias'])
 
 
@@ -60,6 +60,10 @@ class MatFac(skeleton.Model):
 
 @debug
 class FBSystem(skeleton.System):
+    """
+        Obsolete. Testing purposes.
+
+    """
 
     def __init__(self, url, coder, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -86,10 +90,10 @@ class FBSystem(skeleton.System):
                 vecbi(item, ibias),
                 event['data'])
 
-            self.export(user, item)
+            self.export(username, user, itemname, item)
         self._stream.start(handle)
 
-    def export(self, user, item):
+    def export(self, username, user, itemname, item):
         uvec, ivec = self._coder.encode(user.vector, item.vector)
         user = str(user.bias) + '_' + uvec
         item = str(item.bias) + '_' + ivec
