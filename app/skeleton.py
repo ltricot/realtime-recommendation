@@ -6,7 +6,7 @@ realtime recommender system through python abstract classes.
 
 
 #--internal imports
-from testutils import debug
+from .testutils import debug
 
 #--built-in imports
 import abc
@@ -14,13 +14,14 @@ import abc
 
 #--code...
 @debug
-class Model(abc.ABC):
+class Model:
     """
         Abstract class defining the behavior of recommendation models. All
     suggest systems are forced to follow the rules set by this class. These
     methods' behaviors are therefore something you can rely on.
 
     """
+    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def update(self, *args, **kwargs):
@@ -63,12 +64,13 @@ class Model(abc.ABC):
 
 
 @debug
-class Data(abc.ABC):
+class Data:
     """
         Defines interface which needs to be accessible from the class created
     with the mix-ins underneath.
 
     """
+    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def fetch():
@@ -110,4 +112,4 @@ class System(Data, Model):
     model classes. Abstract class.
 
     """
-    ...
+    pass

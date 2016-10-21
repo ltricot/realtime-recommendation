@@ -4,7 +4,7 @@ import sseclient
 
 #--internal imports
 from functools import partial
-from testutils import debug
+from .testutils import debug
 from socket import SHUT_RDWR
 import threading
 import json
@@ -15,11 +15,11 @@ class ClosableSSEClient(sseclient.SSEClient):
 
     def __init__(self, *args, **kwargs):
         self.should_connect = True
-        super(ClosableSSEClient, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _connect(self):
         if self.should_connect:
-            super(ClosableSSEClient, self)._connect()
+            super()._connect()
         else:
             raise StopIteration()
 

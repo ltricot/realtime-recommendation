@@ -6,9 +6,10 @@ requests and grequests library.
 """
 
 
+from . import skeleton
+
 from google.appengine.api import taskqueue
 import grequests
-import skeleton
 import json
 
 
@@ -29,8 +30,7 @@ class Worker:
 
             username = tasks[0].tag
             payloads = (json.loads(task.payload) for task in tasks)
-            itemnames, results = tuple(zip(
-                *(p['meme'], p['data'] for p in payloads)))
+            itemnames, results = tuple(zip(*(p['meme'], p['data'] for p in payloads)))
 
             ubias, user = requests.get(
                 self.url + 'vectors/users/' + username).split('_')
