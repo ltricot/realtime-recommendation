@@ -57,7 +57,7 @@ class Stream:
             def close(self):
                 self.client.close()
 
-        self._stream = ThreadSSE(target=callback)
+        self._stream = ThreadSSE(target=callback, name='stream')
         self._stream.start()
 
     def close(self):

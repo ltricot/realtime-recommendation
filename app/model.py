@@ -46,7 +46,7 @@ class MatFac(skeleton.Model):
         return user, item
 
     def suggest(self, user, item):
-        return np.dot(user.vector, item.vector) + user.bias + item.bias
+        return np.dot(user.vector, item.vector.T) + user.bias + item.bias
 
     def test(self):
         pass

@@ -6,17 +6,22 @@ requests and grequests library.
 """
 
 
-from . import skeleton
+from app import skeleton
+from app.model import vecbi
 
-from google.appengine.api import taskqueue
-import grequests
+# from google.appengine.api import taskqueue # this works in python 2
+from gapis import tqclient as taskqueue
+
+import numpy as np
+import grequests # incompatible with sseclient bc/ of gevent
+import requests
 import json
 
 
 class Worker:
 
-    def __init__(self, system, queue, firebase, encoder):
-        self.url = firebase
+    def __init__(self, system, queue, url, encoder):
+        self.url = url
         self.system = system
         self.queue = queue
         self.coder = encoder
@@ -30,12 +35,14 @@ class Worker:
 
             username = tasks[0].tag
             payloads = (json.loads(task.payload) for task in tasks)
-            itemnames, results = tuple(zip(*(p['meme'], p['data'] for p in payloads)))
+            itemnames, results = tuple(
+                zip(*((p['meme'], p['data']) for p in payloads)))
 
             ubias, user = requests.get(
-                self.url + 'vectors/users/' + username).split('_')
+                self.url + 'vectors/users/' + username + '.json').json().split('_')
 
-            reqs = (grequests.get(self.url + 'vectors/memes/' + i) for i in itemnames)
+            reqs = (grequests.get(
+                self.url + 'vectors/memes/' + i + '.json') for i in itemnames)
             ibiases, items = tuple(zip(
                 *(r.json().split('_') for r in grequests.map(reqs) if r != None)))
 
@@ -48,24 +55,3 @@ class Worker:
                 np.array([results]).T)
 
             self.queue.delete_tasks(tasks)
-
-
-class Boss:
-    """
-        Manages a group of workers.
-
-    """
-
-    def __init__(self, workers):
-        self.workers = workers
-
-    def run(self):
-        # manages workers run coroutines.
-        running = {worker.run(): None for worker in self.workers}
-        while True:
-            for worker, item in running.items:
-                if item is not None:
-                    lis, leng = item
-                    if len(lis) != leng:
-                        continue
-                running[worker] = worker.send(None)

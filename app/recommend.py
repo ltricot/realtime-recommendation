@@ -28,52 +28,12 @@ import abc
 #--external imports
 from firebase import firebase
 import numpy as np
-# from google.appengine.api import taskqueue
+
+# from google.appengine.api import taskqueue # this works in python 2
+from gapis import tqclient as taskqueue
 
 
 #--code...
-@debug
-class DataModel(skeleton.System):
-    """
-        Inherit from this class and Data mix-ins to have your model
-    download its data itself.
-
-    """
-    key = 4
-
-    def update(self, data=None, *args, **kwargs):
-        """
-            Simply fetches data and passes it to the next update method in the
-        class's MRO.
-
-        """
-
-        if data is None: data = self.fetch()
-        return super().update(data=data.values, *args, **kwargs)
-
-    def suggest(self, users=None):
-        """
-            Permits the use of user indices (instead of numbers) to recommend.
-        Returns a dataframe whose index is a list of users and whose columns is
-        a list of object_ids.
-
-        """
-
-        if users is None:
-            users = list(range(len(self.data)))
-        elif isinstance(users[0], str):
-            user_names = list(self.data.index)
-            users = [user_names.index(u) for u in users]
-        suggestions = pd.DataFrame(
-            super().suggest(users),
-            index=self.data.index[users],
-            columns=self.data.columns)
-        # the next lines are weird due to pandas indexing rules
-        a, b = self.data.values[users].nonzero()
-        suggestions.iloc[tuple(a), tuple(b)] = -1
-        return suggestions
-
-
 @debug
 class FBSystem(skeleton.System):
     """
@@ -122,9 +82,10 @@ class FBSystem(skeleton.System):
 
 
 @debug
-class QueuedFBSystem(FBSystem):
+class QueuedFBSystem:
 
-    def __init__(self, queue, *args, **kwargs):
+    def __init__(self, queue, url, *args, **kwargs):
+        self._stream = Stream(url + 'likes.json')
         self._queue = queue
         super().__init__(*args, **kwargs)
 
