@@ -49,7 +49,6 @@ class BackEndQueue:
 
 
 app = Flask(__name__)
-q = BackEndQueue()
 
 @app.route('/', methods=['GET', 'POST', 'DELETE'])
 def interact():
@@ -74,4 +73,5 @@ def interact():
 
 
 if __name__ == '__main__':
+    q = BackEndQueue()
     app.run()

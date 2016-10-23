@@ -29,7 +29,7 @@ class MatFac(skeleton.Model):
         self._eta = eta
 
     def _grad(self, user, item, data):
-        grad = self._eta * (self.suggest(user, item) - data)
+        grad = self._eta * (self.suggest(user, item).T - data)
         return gradient(
             user=np.mean(item.vector * grad), # multiple items
             item=user.vector * grad,
@@ -46,7 +46,7 @@ class MatFac(skeleton.Model):
         return user, item
 
     def suggest(self, user, item):
-        return np.dot(user.vector, item.vector.T) + user.bias + item.bias
+        return np.dot(user.vector[np.newaxis, :], item.vector.T) + user.bias + item.bias
 
     def test(self):
         pass

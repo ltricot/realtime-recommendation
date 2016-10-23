@@ -1,7 +1,7 @@
 """
     For now this module uses the python-firebase library. Will have to dump it
 because of crappy async handling -- it uses multiprocessing... Will move to the
-requests and grequests library.
+requests and grequests library. This is done now.
 
 """
 
@@ -53,5 +53,12 @@ class Worker:
                 vecbi(user, ubias),
                 vecbi(np.array(items), np.array(ibiases)),
                 np.array([results]).T)
+
+            uservec, *itemvecs = self.coder.encode(user.vector, *list(item.vector))
+            reqs = (grequests.patch(self.url + 'vectors/memes/.json', data=json.dumps(
+                {i: str(ib) + '_' + iv})) for i, ib, iv in zip(itemnames, item.bias.T[0], itemvecs))
+            grequests.map(reqs)
+            requests.patch(self.url + 'vectors/users/.json', data=json.dumps(
+                {username: str(user.bias) + '_' + uservec}))
 
             self.queue.delete_tasks(tasks)

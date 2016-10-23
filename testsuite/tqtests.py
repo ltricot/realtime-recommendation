@@ -2,7 +2,10 @@ from functools import wraps
 import sys, os, time
 import subprocess
 import requests
+import json
 
+
+URL = 'https://meme-tinder.firebaseio.com/'
 
 class Env:
 
@@ -35,9 +38,21 @@ def context(manager, *args, **kwargs):
         return wrapped
     return manager
 
-with PPath(['/home/loan/MEMETINDER_PROJECT/memetinder-nextgen']):
+with PPath(['/home/loan/MEMETINDER_PROJECT/memetinder-nextgen']), open('/dev/null', 'w') as void:
     p1 = subprocess.Popen(['python', '-m', 'gapis.tqserver', '&'])
-    time.sleep(2)
     p2 = subprocess.Popen(['python', '-m', 'testsuite.test2', '&'])
-    time.sleep(5)
     p3 = subprocess.Popen(['python', '-m', 'testsuite.test3', '&'])
+
+def overload():
+    n = 1; name1 = 'loan'; name2 = 'simon'
+    for x in range(100):
+        if x % 4 == 0:
+            n = -n
+            name1, name2 = name2, name1
+        data = json.dumps({'meme{}'.format((x % 4) + 1): n})
+        requests.patch(
+            URL + 'likes/{}/.json'.format(name1),
+            headers=headers,
+            data=data)
+
+overload()
