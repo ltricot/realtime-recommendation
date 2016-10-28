@@ -29,13 +29,10 @@ class Debugger:
         @wraps(func)
         def debugged(*args, **kwargs):
             print('  '*self.depth, cls.__name__, func.__name__)
-
             self.depth += 1
             results = func(*args, **kwargs)
             self.depth -= 1
-
             print('  '*self.depth, 'End', cls.__name__, func.__name__)
-
             return results
         return debugged
 
