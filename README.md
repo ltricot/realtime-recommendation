@@ -6,5 +6,6 @@ constraints:
 * works in real time
 * modular, for easy change (i.e. use a different database)
 * depends on few libraries (cloud services constraints)
+* can run on google app engine (temporary)
 
 Work in progress.
